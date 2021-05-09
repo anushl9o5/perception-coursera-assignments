@@ -1,0 +1,41 @@
+function [C, R] = LinearPnP(X, x, K)
+%% LinearPnP
+% Getting pose from 2D-3D correspondences
+% Inputs:
+%     X - size (N x 3) matrix of 3D points
+%     x - size (N x 2) matrix of 2D points whose rows correspond with X
+%     K - size (3 x 3) camera calibration (intrinsics) matrix
+% Outputs:
+%     C - size (3 x 1) pose transation
+%     R - size (3 x 1) pose rotation
+%
+% IMPORTANT NOTE: While theoretically you can use the x directly when solving
+% for the P = [R t] matrix then use the K matrix to correct the error, this is
+% more numeically unstable, and thus it is better to calibrate the x values
+% before the computation of P then extract R and t directly
+
+x_homo = [x, ones(length(x), 1)];
+
+x_homo = (inv(K)*x_homo')';
+
+X_homo = [X, ones(length(x), 1)];
+x_cross = [zeros(length(x), 1) -x_homo(:, 3) x_homo(:, 2) ; x_homo(:, 3) zeros(length(x), 1) -x_homo(:, 1) ; -x_homo(:, 2) x_homo(:, 1) zeros(length(x), 1)];
+
+x_cross = reshape(x_cross, length(x), 3, 3);
+
+A = zeros(length(X), 3, 12);
+
+for i=1:length(X)
+    A(i, :) = [x_cross(i, 1) .* X_homo(i, :), x_cross(i, 2) .* X_homo(i, :), x_cross(i, 3) .* X_homo(i, :), x_cross(i, 4) .* X_homo(i, :), x_cross(i, 5) .* X_homo(i, :), x_cross(i, 6) .* X_homo(i, :), x_cross(i, 7) .* X_homo(i, :), x_cross(i, 8) .* X_homo(i, :), x_cross(i, 9) .* X_homo(i, :)];
+end
+
+squeeze(A(1, :, :))
+
+
+
+
+
+
+
+
+
